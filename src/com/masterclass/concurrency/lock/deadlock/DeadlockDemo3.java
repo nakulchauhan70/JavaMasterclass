@@ -1,0 +1,60 @@
+package com.masterclass.concurrency.lock.deadlock;
+
+//Deadlock - Thread 1 acquiring lock1, waiting for lock2 and thread 2 acquiring lock2, waiting for lock1
+//Avoid deadlock - 1. Thread1 and Thread2 must acquire lock in same order
+//                 2. Use tryLock() method
+public class DeadlockDemo3 {
+
+    public static Object lock1 = new Object();
+    public static Object lock2 = new Object();
+
+    public static void main(String[] args) {
+        new Thread1().start();
+        new Thread2().start();
+    }
+
+    private static class Thread1 extends Thread {
+        public void run() {
+            synchronized (lock1) {
+                System.out.println("Thread 1: Has lock1");
+                try {
+                    Thread.sleep(100);  //here thread suspended - without this there won't be deadlock
+                } catch (InterruptedException e) {
+
+                }
+                System.out.println("Thread 1: Waiting for lock 2");
+                synchronized (lock2) {
+                    System.out.println("Thread 1: Has lock1 and lock2");
+                }
+                System.out.println("Thread 1: Released lock2");
+            }
+            System.out.println("Thread 1: Released lock1. Exiting...");
+        }
+    }
+
+    private static class Thread2 extends Thread {
+        public void run() {
+            synchronized (lock2) {  //lock2
+                System.out.println("Thread 2: Has lock1");
+                try {
+                    Thread.sleep(100); //here thread suspended - without this there won't be deadlock
+                } catch (InterruptedException e) {
+
+                }
+                System.out.println("Thread 2: Waiting for lock2");
+                synchronized (lock1) {  //lock1
+                    System.out.println("Thread 2: Has lock1 and lock2");
+                }
+                System.out.println("Thread 2: released lock2");
+            }
+            System.out.println("Thread 2: Released lock1. Exiting...");
+        }
+    }
+}
+
+
+
+
+
+
+

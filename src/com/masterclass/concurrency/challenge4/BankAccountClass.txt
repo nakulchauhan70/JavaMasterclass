@@ -1,0 +1,4 @@
+Challenge
+
+Update deposit/withdrawal method to make status variable thread safe.
+You can use synchronized/lock

@@ -1,0 +1,28 @@
+
+Find the issue with the code.
+
+It is deadlock situation.
+
+Solution
+
+1. The tutor thread calls the tutor.studyTime() method. It acquires the Tutor lock, and then the Student lock.
+2. The tutor thread reaches the this.wait() line of code. When it executes wait(), it releases the tutor lock.
+   Recall that the wait() and notifyAll() methods must be called from within synchronized blocks.
+   To call wait() on an object, a thread must be holding the object's lock. When it calls wait(), it releases the lock.
+3. The student thread runs the handleAssignment() method. It gets the tutor lock and calls getProgressReport().
+   It then tries to get the student lock, but the tutor thread is still holding it. Because of that,the student can't notify the tutor thread.
+4. Deadlock.
+
+
+So the tricky part here is that it looks like the two threads have to obtain the locks in the same order.
+From a casual look at the code it doesn't seem possible for a thread to get the tutor lock and then block on getting the student lock. But because the wait() method results in a thread releasing the
+lock until it's notified, the student thread can actually obtain a tutor lock or the to the thread is still holding the student lock.
+
+So we can add another item to the "what to check if the code is deadlocking" list.
+Take a look at places where the code calls wait() and see if that may cause a deadlock.
+The wait() method results in a thread releasing a lock before it is actually
+exited the synchronized block, and it's premature (albeit temporarily) release can lead to problems if we're not careful.
+
+How would we fix this?
+That would really depend on the code perhaps using reentrant lock objects will work better.
+We could have the tutor thread release the student lock before it calls wait(), and then try and require it again once it's woken up.

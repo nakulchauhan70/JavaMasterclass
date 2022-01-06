@@ -1,0 +1,61 @@
+package com.masterclass.concurrency.producerconsumer.demo2; /**
+ * Producers serving soup for Consumers to eat
+ */
+
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
+
+class SoupProducerDetails extends Thread {
+
+    private BlockingQueue servingLine;
+
+    public SoupProducerDetails(BlockingQueue servingLine) {
+        this.servingLine = servingLine;
+    }
+
+    public void run() {
+        for (int i = 0; i < 20; i++) { // serve 20 bowls of soup
+            try {
+                servingLine.add("Bowl #" + i);
+                System.out.format("Served Bowl #%d - remaining capacity: %d\n", i, servingLine.remainingCapacity());
+                Thread.sleep(200); // time to serve a bowl of soup
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        servingLine.add("no soup for you!");
+        servingLine.add("no soup for you!");
+    }
+}
+
+class SoupConsumerDetails extends Thread {
+
+    private BlockingQueue servingLine;
+
+    public SoupConsumerDetails(BlockingQueue servingLine) {
+        this.servingLine = servingLine;
+    }
+
+    public void run() {
+        while (true) {
+            try {
+                String bowl = (String) servingLine.take();
+                if (bowl == "no soup for you!")
+                    break;
+                System.out.format("Ate %s\n", bowl);
+                Thread.sleep(300); // time to eat a bowl of soup
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+    }
+}
+
+public class ProducerConsumerSolution {
+    public static void main(String args[]) {
+        BlockingQueue servingLine = new ArrayBlockingQueue<String>(5);
+        new SoupConsumerDetails(servingLine).start();
+        new SoupConsumerDetails(servingLine).start();
+        new SoupProducerDetails(servingLine).start();
+    }
+}

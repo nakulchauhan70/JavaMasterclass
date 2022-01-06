@@ -1,0 +1,44 @@
+
+Find out issue with given class.
+
+The problem is deadlock.
+
+Potential sequence
+
+1. The tutor thread called tutor.studyTime().
+2. Tutor thread gets the lock for the tutor object( and that's because the studyTime() method is synchronized),
+   It prints "Tutor has arrived" and wait for the student, which we've simulated by calling sleep().
+3. The student thread runs and calls the handInAssignment(). Since the method is synchronized, it gets the lock for the student object.
+   It calls tutor.getProgress(), report but tutor thread is holding the lock for the tutor object, so the Student thread blocks.
+4. The tutor thread wakes up and runs, and calls student.startStudy(). But the methos is synchronized, and the Student thread is holding the lock for the Student object, so the Tutor thread blocks.
+5. We have a deadlock. Neither thread will ever release the lock that the other thread is waiting for.
+
+Essentially, the threads are trying to acquire the same set of locks but in a different order,
+and are often results in a deadlock the tutors thread gets the Tutor lock and then wants the Student lock.
+The student thread gets the Student lock and then wants the Tutor lock.
+
+Solution1
+The fix will depend on the code. Perhaps over synchronization is occurring.
+Do we really need to synchronize all the methods, or can we isolate critical
+sections of code within the methods and use synchronized blocks instead?
+In a real-world application, we really would have to study the code.
+
+We might also consider rewriting some code.
+Do the tutor and student objects really need to call each other in a circular fashion?
+Can we make these two parameters in any way?
+
+Solution2
+So another potential solution would be to use ReentrantLock objects and the tryLock() method with a timeout value.
+If the tryLock() method times out the thread wouldn't be able to execute the critical section of code, but at least the application wouldn't be deadlocked.
+Also, a thread could release any locks it's holding when the tryLock() times out,
+allowing any threads waiting for those locks to run successfully.
+
+Solution3
+They may be other solutions when dealing with a deadlock situation look for the following:
+
+1. Is a set of locks been obtained in a different order multiple threads
+(and that was the case here) If so, can we force all threads to obtain the locks in the same order?
+
+2. Are we over synchronizing the code?
+3. Can we rewrite the code to break any circular call patents?
+4. Would using reentrant lock objects help?

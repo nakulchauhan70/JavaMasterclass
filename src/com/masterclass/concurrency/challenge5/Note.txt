@@ -1,0 +1,9 @@
+
+Find out issue with given class.
+
+
+
+So the code actually gives rise to a live lock situation the two threads aren't blocked
+but they can't progress so they'll keep withdrawing money trying to do the transfer failing
+and then refunding the money then they'll loop back and try to do the transfer again until
+we manually terminate the application so to fix it what we need to
